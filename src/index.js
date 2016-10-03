@@ -41,6 +41,7 @@ class TicTacToeGame extends Component {
       // Score Array R1-R3, C1-C3, D1, D2
       score: Array(2*3+2).fill(0),
       player: true,
+      gameState: 'idle'
     }
 
     this.handleClick = this.handleClick.bind(this);
@@ -51,6 +52,12 @@ class TicTacToeGame extends Component {
   }
 
   handleClick(row, col) {
+
+    let result = '';
+    let possiblemoves = [];
+
+    if (this.state.gameState !== 'idle') return;
+
     let newboard = this.state.board;
     let newscore = this.state.score;
     let point = 0;
@@ -75,15 +82,6 @@ class TicTacToeGame extends Component {
       player: !this.state.player
     }, () => {
 
-      this.state.score.forEach((elem) => {
-        if (elem === 3) {
-          console.log('+1 wins');
-        } else if (elem === -3) {
-          console.log('-1 wins');
-        }
-      });
-
-      let possiblemoves = [];
       this.state.board.forEach((item, row) => {
         item.forEach((elem, col) => {
           if (elem === 0) {
@@ -92,12 +90,27 @@ class TicTacToeGame extends Component {
         })
       });
 
-      let AImove = possiblemoves[Math.floor(Math.random()*possiblemoves.length)];
-
-      if (!this.state.player) {
-        this.handleClick(AImove[0], AImove[1]);
+      if (possiblemoves.length <= 0) {
+        result = 'tie'
       }
 
+      this.state.score.forEach((elem) => {
+        if (elem === 3) {
+          result = 'owon';
+        } else if (elem === -3) {
+          result = 'xwon';
+        }
+      });
+
+      if (result) {
+        console.log(result);
+        this.setState({
+          gameState: result
+        })
+      } else if (!this.state.player) {
+          let AImove = possiblemoves[Math.floor(Math.random() * possiblemoves.length)];
+          this.handleClick(AImove[0], AImove[1]);
+      }
     });
   }
 
