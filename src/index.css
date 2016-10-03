@@ -1,5 +1,20 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
+table {
+    border-collapse: collapse;
+}
+td {
+  width: 100px;
+  height: 110px;
+  font-size: 50px;
+}
+
+td.space {
+  cursor: pointer;
+}
+
+td.col0, td.col1 {
+  border-right: 10px solid black;
+}
+
+tr.row0, tr.row1 {
+  border-bottom: 10px solid black;
 }

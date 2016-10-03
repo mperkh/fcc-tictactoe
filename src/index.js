@@ -3,26 +3,29 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 const Space = (props) => {
-
-  let output;
-
   if (props.item === 0) {
-    output = (
-      <button
-        onClick={props.onClick.bind(this, props.row, props.col)}
-      >
-        Press
-      </button>
+    return (
+      <td className={'col' + props.col + ' space'} key={props.col} onClick={props.onClick.bind(this, props.row, props.col)}>
+      </td>
     )
-  } else {
-    output = props.item;
+  } else if (props.item === 1) {
+    return (
+      <td className={'col' + props.col} key={props.col}>
+        <svg width="80px" height="80px" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="45" cy="50" r="25" stroke="black" strokeWidth="10" fill="none" />
+        </svg>
+      </td>
+    )
+  } else if (props.item === -1) {
+    return (
+      <td className={'col' + props.col} key={props.col}>
+        <svg width="80px" height="80px" xmlns="http://www.w3.org/2000/svg">
+          <line x1="15" x2="75" y1="15" y2="75" stroke="black" strokeWidth="10" />
+          <line x1="15" x2="75" y1="75" y2="15" stroke="black" strokeWidth="10" />
+        </svg>
+      </td>
+    )
   }
-
-  return (
-    <span>
-      {output}
-    </span>
-  );
 };
 
 class TicTacToeGame extends Component {
@@ -106,18 +109,17 @@ class TicTacToeGame extends Component {
             {
               this.state.board.map((element, row) => {
                 return (
-                  <tr key={row}>
+                  <tr className={'row' + row} key={row}>
                     {
                       element.map((item, col) => {
                         return (
-                          <td key={col}>
-                            <Space
-                              item={item}
-                              row={row}
-                              col={col}
-                              onClick={this.handleClick}
-                            />
-                          </td>
+                          <Space
+                            item={item}
+                            row={row}
+                            col={col}
+                            onClick={this.handleClick}
+                            key={'' + row + col}
+                          />
                         )
                       })
                     }
