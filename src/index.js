@@ -10,11 +10,11 @@ import './index.css';
 
 const ModalWinner= (props) => {
   let message;
-  if (props.winner === 'xwon') {
+  if (props.winner === 'x') {
     message = 'X has won this time.'
-  } else if (props.winner === 'owon') {
+  } else if (props.winner === 'o') {
     message = 'O has won this time.'
-  } else if (props.winner === 'tie') {
+  } else if (props.winner === 't') {
     message = 'The game ended in a tie.'
   }
   return (
@@ -57,7 +57,7 @@ const Space = (props) => {
     )
   } else if (props.item === -1) {
     return (
-      <td className={'col' + props.col} key={props.col}>
+      <td className={'col' + props.col + (props.winner ? ' winner' : '')} key={props.col}>
         <svg width="80px" height="80px" xmlns="http://www.w3.org/2000/svg">
           <circle cx="45" cy="50" r="25" stroke="black" strokeWidth="10" fill="none" />
         </svg>
@@ -65,7 +65,7 @@ const Space = (props) => {
     )
   } else if (props.item === 1) {
     return (
-      <td className={'col' + props.col} key={props.col}>
+      <td className={'col' + props.col + (props.winner ? ' winner' : '')} key={props.col}>
         <svg width="80px" height="80px" xmlns="http://www.w3.org/2000/svg">
           <line x1="15" x2="75" y1="15" y2="75" stroke="black" strokeWidth="10" />
           <line x1="15" x2="75" y1="75" y2="15" stroke="black" strokeWidth="10" />
@@ -182,22 +182,22 @@ class TicTacToeGame extends Component {
       });
 
       if (possiblemoves.length <= 0) {
-        result = 'tie'
+        result = '0t'
       }
 
       this.state.score.forEach((elem, idx) => {
         if (elem === 3) {
-          result = 'xwon';
+          result = idx + 'x';
         } else if (elem === -3) {
-          result = 'owon';
+          result = idx + 'o';
         }
       });
 
       if (result) {
         this.setState({
           gameState: result,
-          player1Score: (result === 'xwon') ? this.state.player1Score + 1 : this.state.player1Score,
-          player2Score: (result === 'owon') ? this.state.player2Score + 1 : this.state.player2Score
+          player1Score: (result.substr(1,2) === 'x') ? this.state.player1Score + 1 : this.state.player1Score,
+          player2Score: (result.substr(1,2) === 'o') ? this.state.player2Score + 1 : this.state.player2Score
         })
       } else if (!this.state.player) {
           let AImove = possiblemoves[Math.floor(Math.random() * possiblemoves.length)];
@@ -209,7 +209,7 @@ class TicTacToeGame extends Component {
   render() {
     let winnerModal;
     if (this.state.gameState !== 'idle') {
-      winnerModal = <ModalWinner winner={this.state.gameState} onContinue={this.handelContinue}/>
+      winnerModal = <ModalWinner winner={this.state.gameState.substr(1,2)} onContinue={this.handelContinue}/>
     }
     return (
       <div>
@@ -222,6 +222,38 @@ class TicTacToeGame extends Component {
                   <tr className={'row' + row} key={row}>
                     {
                       element.map((item, col) => {
+                        let win = false;
+                        if (this.state.gameState !== 'idle' && this.state.gameState !== '0t') {
+                          switch (this.state.gameState.substr(0,1)) {
+                            case '0':
+                              if (row === 0) win = true;
+                            break;
+                            case '1':
+                              if (row === 1) win = true;
+                            break;
+                            case '2':
+                              if (row === 2) win = true;
+                            break;
+                            case '3':
+                              if (col === 0) win = true;
+                            break;
+                            case '4':
+                              if (col === 1) win = true;
+                            break;
+                            case '5':
+                              if (col === 2) win = true;
+                            break;
+                            case '6':
+                              if (row === col) win = true;
+                            break;
+                            case '7':
+                              if (row === 2 - col) win = true;
+                            break;
+                            default:
+                              win = false;
+                            break;
+                          }
+                        }
                         return (
                           <Space
                             item={item}
@@ -229,6 +261,7 @@ class TicTacToeGame extends Component {
                             col={col}
                             onClick={this.handleClick}
                             key={'' + row + col}
+                            winner={win}
                           />
                         )
                       })

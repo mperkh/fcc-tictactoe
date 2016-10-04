@@ -17,6 +17,10 @@ td.col0, td.col1 {
   border-right: 10px solid black;
 }
 
+td.winner {
+  background-color: red;
+}
+
 tr.row0, tr.row1 {
   border-bottom: 10px solid black;
 }
