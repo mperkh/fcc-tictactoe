@@ -20,3 +20,7 @@ td.col0, td.col1 {
 tr.row0, tr.row1 {
   border-bottom: 10px solid black;
 }
+
+#resetbtn {
+  float: right;
+}

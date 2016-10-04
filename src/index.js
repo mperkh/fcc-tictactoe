@@ -8,7 +8,31 @@ import { Modal } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 import './index.css';
 
-const BaseConfigModal = (props) => {
+const ModalWinner= (props) => {
+  let message;
+  if (props.winner === 'xwon') {
+    message = 'X has won this time.'
+  } else if (props.winner === 'owon') {
+    message = 'O has won this time.'
+  } else if (props.winner === 'tie') {
+    message = 'The game ended in a tie.'
+  }
+  return (
+    <Modal show={true}>
+      <Modal.Header>
+        <Modal.Title>Game Over</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {message}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button bsStyle="primary" onClick={props.onContinue}>Play another round</Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
+
+const BaseConfigModal  = (props) => {
   return (
     <Modal show={props.show}>
       <Modal.Header>
@@ -64,10 +88,13 @@ class TicTacToeGame extends Component {
       // Score Array R1-R3, C1-C3, D1, D2
       score: Array(2*3+2).fill(0),
       player: true,
-      gameState: 'idle'
+      gameState: 'idle',
+      player1Score: 0,
+      player2Score: 0,
     }
 
     this.handleClick = this.handleClick.bind(this);
+    this.handelContinue = this.handelContinue.bind(this);
   }
 
   componentDidMount() {
@@ -79,6 +106,39 @@ class TicTacToeGame extends Component {
           Math.floor(Math.random() * 3),
           Math.floor(Math.random() * 3)
         )
+      })
+    }
+  }
+
+  handelContinue() {
+    if (this.props.color === -1) {
+      this.setState({
+        player: false,
+        board: [
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0]
+        ],
+        // Score Array R1-R3, C1-C3, D1, D2
+        score: Array(2*3+2).fill(0),
+        gameState: 'idle',
+      }, () => {
+        this.handleClick(
+          Math.floor(Math.random() * 3),
+          Math.floor(Math.random() * 3)
+        )
+      })
+    } else {
+      this.setState({
+        player: true,
+        board: [
+          [0, 0, 0],
+          [0, 0, 0],
+          [0, 0, 0]
+        ],
+        // Score Array R1-R3, C1-C3, D1, D2
+        score: Array(2*3+2).fill(0),
+        gameState: 'idle',
       })
     }
   }
@@ -125,7 +185,7 @@ class TicTacToeGame extends Component {
         result = 'tie'
       }
 
-      this.state.score.forEach((elem) => {
+      this.state.score.forEach((elem, idx) => {
         if (elem === 3) {
           result = 'xwon';
         } else if (elem === -3) {
@@ -134,9 +194,10 @@ class TicTacToeGame extends Component {
       });
 
       if (result) {
-        console.log(result);
         this.setState({
-          gameState: result
+          gameState: result,
+          player1Score: (result === 'xwon') ? this.state.player1Score + 1 : this.state.player1Score,
+          player2Score: (result === 'owon') ? this.state.player2Score + 1 : this.state.player2Score
         })
       } else if (!this.state.player) {
           let AImove = possiblemoves[Math.floor(Math.random() * possiblemoves.length)];
@@ -146,8 +207,13 @@ class TicTacToeGame extends Component {
   }
 
   render() {
+    let winnerModal;
+    if (this.state.gameState !== 'idle') {
+      winnerModal = <ModalWinner winner={this.state.gameState} onContinue={this.handelContinue}/>
+    }
     return (
       <div>
+        {winnerModal}
         <table id='gamefield'>
           <tbody>
             {
@@ -173,6 +239,9 @@ class TicTacToeGame extends Component {
             }
           </tbody>
         </table>
+        <hr />
+        Player 1 Score: {this.state.player1Score}<br />
+        Player 2 Score: {this.state.player2Score}
       </div>
     );
   }
@@ -187,6 +256,13 @@ class App extends Component {
     }
 
     this.handlePlayerChoice = this.handlePlayerChoice.bind(this);
+    this.handleReset = this.handleReset.bind(this);
+  }
+
+  handleReset() {
+    this.setState({
+      color: undefined
+    })
   }
 
   handlePlayerChoice (choice) {
@@ -206,12 +282,17 @@ class App extends Component {
     if (!this.state.color) {
       mainAction = <BaseConfigModal show={true} onChoice={this.handlePlayerChoice}/>
     } else {
-      mainAction = <TicTacToeGame color={this.state.color}/>
+      mainAction = (
+        <div>
+          <TicTacToeGame color={this.state.color}/>
+          <Button bsStyle="danger" id="resetbtn" onClick={this.handleReset}>Restart All</Button>
+        </div>
+      )
     }
     return (
       <Grid>
         <Row>
-          <Col sm={6} smOffset={3}>
+          <Col md={8} mdOffset={2}>
             <PageHeader>freeCodeCamp: Build a Tic Tac Toe Game
               <br/><small>Project by camper <a href="https://www.freecodecamp.com/mperkh" target="_blank">Michael Perkhofer</a></small>
             </PageHeader>
