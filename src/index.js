@@ -1,6 +1,29 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import { PageHeader } from 'react-bootstrap';
+import { Grid } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import './index.css';
+
+const BaseConfigModal = (props) => {
+  return (
+    <Modal show={props.show}>
+      <Modal.Header>
+        <Modal.Title>Tic Tac Toe</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        Welcome to yet another Tic Tac Toe game. Please choose, if you want to play as 'X' or 'O'.
+      </Modal.Body>
+      <Modal.Footer>
+        <Button bsStyle="primary" onClick={props.onChoice.bind(this, -1)}>O</Button>
+        <Button bsStyle="primary" onClick={props.onChoice.bind(this, 1)}>X</Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
 
 const Space = (props) => {
   if (props.item === 0) {
@@ -8,7 +31,7 @@ const Space = (props) => {
       <td className={'col' + props.col + ' space'} key={props.col} onClick={props.onClick.bind(this, props.row, props.col)}>
       </td>
     )
-  } else if (props.item === 1) {
+  } else if (props.item === -1) {
     return (
       <td className={'col' + props.col} key={props.col}>
         <svg width="80px" height="80px" xmlns="http://www.w3.org/2000/svg">
@@ -16,7 +39,7 @@ const Space = (props) => {
         </svg>
       </td>
     )
-  } else if (props.item === -1) {
+  } else if (props.item === 1) {
     return (
       <td className={'col' + props.col} key={props.col}>
         <svg width="80px" height="80px" xmlns="http://www.w3.org/2000/svg">
@@ -48,11 +71,19 @@ class TicTacToeGame extends Component {
   }
 
   componentDidMount() {
-
+    if (this.props.color === -1) {
+      this.setState({
+        player: false
+      }, () => {
+        this.handleClick(
+          Math.floor(Math.random() * 3),
+          Math.floor(Math.random() * 3)
+        )
+      })
+    }
   }
 
   handleClick(row, col) {
-
     let result = '';
     let possiblemoves = [];
 
@@ -63,9 +94,9 @@ class TicTacToeGame extends Component {
     let point = 0;
 
     if (this.state.player) {
-      point = 1;
+      point = 1 * this.props.color;
     } else {
-      point = -1;
+      point = -1 * this.props.color;
     }
 
     newboard[row][col] = point;
@@ -96,9 +127,9 @@ class TicTacToeGame extends Component {
 
       this.state.score.forEach((elem) => {
         if (elem === 3) {
-          result = 'owon';
-        } else if (elem === -3) {
           result = 'xwon';
+        } else if (elem === -3) {
+          result = 'owon';
         }
       });
 
@@ -117,7 +148,7 @@ class TicTacToeGame extends Component {
   render() {
     return (
       <div>
-        <table>
+        <table id='gamefield'>
           <tbody>
             {
               this.state.board.map((element, row) => {
@@ -148,11 +179,46 @@ class TicTacToeGame extends Component {
 }
 
 class App extends Component {
+  constructor() {
+    super()
+
+    this.state = {
+      color: undefined
+    }
+
+    this.handlePlayerChoice = this.handlePlayerChoice.bind(this);
+  }
+
+  handlePlayerChoice (choice) {
+    if (choice === -1) {
+      this.setState({
+        color: -1
+      })
+    } else if (choice === 1) {
+      this.setState({
+        color: 1
+      })
+    }
+  }
+
   render() {
+    let mainAction;
+    if (!this.state.color) {
+      mainAction = <BaseConfigModal show={true} onChoice={this.handlePlayerChoice}/>
+    } else {
+      mainAction = <TicTacToeGame color={this.state.color}/>
+    }
     return (
-      <div className="App">
-        <TicTacToeGame />
-      </div>
+      <Grid>
+        <Row>
+          <Col sm={6} smOffset={3}>
+            <PageHeader>freeCodeCamp: Build a Tic Tac Toe Game
+              <br/><small>Project by camper <a href="https://www.freecodecamp.com/mperkh" target="_blank">Michael Perkhofer</a></small>
+            </PageHeader>
+            {mainAction}
+          </Col>
+        </Row>
+      </Grid>
     );
   }
 }

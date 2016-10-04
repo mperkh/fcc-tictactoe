@@ -1,6 +1,8 @@
-table {
+table#gamefield {
     border-collapse: collapse;
+    margin: 0 auto;
 }
+
 td {
   width: 100px;
   height: 110px;
