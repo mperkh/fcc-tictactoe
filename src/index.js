@@ -85,13 +85,14 @@ class TicTacToeGame extends Component {
         [0, 0, 0],
         [0, 0, 0]
       ],
-      // Score Array R1-R3, C1-C3, D1, D2
-      score: Array(2*3+2).fill(0),
-      player: true,
       gameState: 'idle',
       player1Score: 0,
       player2Score: 0,
     }
+
+    // Score Array R1-R3, C1-C3, D1, D2
+    this.score = Array(2*3+2).fill(0);
+    this.player = true;
 
     this.handleClick = this.handleClick.bind(this);
     this.handelContinue = this.handelContinue.bind(this);
@@ -99,111 +100,119 @@ class TicTacToeGame extends Component {
 
   componentDidMount() {
     if (this.props.color === -1) {
-      this.setState({
-        player: false
-      }, () => {
-        this.handleClick(
-          Math.floor(Math.random() * 3),
-          Math.floor(Math.random() * 3)
-        )
-      })
+      this.player = false;
+      this.handleClick(
+        Math.floor(Math.random() * 3),
+        Math.floor(Math.random() * 3)
+      )
     }
   }
 
   handelContinue() {
-    if (this.props.color === -1) {
-      this.setState({
-        player: false,
-        board: [
-          [0, 0, 0],
-          [0, 0, 0],
-          [0, 0, 0]
-        ],
-        // Score Array R1-R3, C1-C3, D1, D2
-        score: Array(2*3+2).fill(0),
-        gameState: 'idle',
-      }, () => {
+    // Score Array R1-R3, C1-C3, D1, D2
+    this.score = Array(2*3+2).fill(0);
+    this.setState({
+      board: [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0]
+      ],
+      gameState: 'idle',
+    }, () => {
+      if (this.props.color === -1) {
+        this.player = false;
         this.handleClick(
           Math.floor(Math.random() * 3),
           Math.floor(Math.random() * 3)
         )
-      })
-    } else {
-      this.setState({
-        player: true,
-        board: [
-          [0, 0, 0],
-          [0, 0, 0],
-          [0, 0, 0]
-        ],
-        // Score Array R1-R3, C1-C3, D1, D2
-        score: Array(2*3+2).fill(0),
-        gameState: 'idle',
-      })
-    }
+      } else {
+        this.player = true;
+      }
+    });
   }
 
-  handleClick(row, col) {
-    let result = '';
+  getPossibleMoves(board) {
     let possiblemoves = [];
+    board.forEach((item, row) => {
+      item.forEach((elem, col) => {
+        if (elem === 0) {
+          possiblemoves.push([row, col]);
+        }
+      })
+    });
+    return possiblemoves;
+  }
 
-    if (this.state.gameState !== 'idle') return;
-
-    let newboard = this.state.board;
-    let newscore = this.state.score;
-    let point = 0;
-
-    if (this.state.player) {
-      point = 1 * this.props.color;
-    } else {
-      point = -1 * this.props.color;
-    }
-
-    newboard[row][col] = point;
-
-    // http://stackoverflow.com/a/18668901
-    newscore[row] += point;
-    newscore[col + 3] += point;
-    if (col === row) newscore[6] += point;
-    if (2 - col === row) newscore[7] += point;
-
-    this.setState({
-      board: newboard,
-      score: newscore,
-      player: !this.state.player
-    }, () => {
-
-      this.state.board.forEach((item, row) => {
-        item.forEach((elem, col) => {
-          if (elem === 0) {
-            possiblemoves.push([row, col]);
-          }
-        })
-      });
+  getBoardResult(board, score) {
+      let result = '';
+      let possiblemoves = this.getPossibleMoves(board);
 
       if (possiblemoves.length <= 0) {
         result = '0t'
       }
 
-      this.state.score.forEach((elem, idx) => {
+      score.forEach((elem, idx) => {
         if (elem === 3) {
           result = idx + 'x';
         } else if (elem === -3) {
           result = idx + 'o';
         }
       });
+      return result;
+  }
 
-      if (result) {
-        this.setState({
-          gameState: result,
-          player1Score: (result.substr(1,2) === 'x') ? this.state.player1Score + 1 : this.state.player1Score,
-          player2Score: (result.substr(1,2) === 'o') ? this.state.player2Score + 1 : this.state.player2Score
-        })
-      } else if (!this.state.player) {
-          let AImove = possiblemoves[Math.floor(Math.random() * possiblemoves.length)];
-          this.handleClick(AImove[0], AImove[1]);
-      }
-    });
+  makeMove(board, score, player, row, col, color) {
+    let point = 0;
+
+    if (player) {
+      point = 1 * color;
+    } else {
+      point = -1 * color;
+    }
+
+    board[row][col] = point;
+
+    // http://stackoverflow.com/a/18668901
+    score[row] += point;
+    score[col + 3] += point;
+    if (col === row) score[6] += point;
+    if (2 - col === row) score[7] += point;
+
+    return {newboard: board, newscore: score}
+  }
+
+  makeAImove(board) {
+    let possiblemoves = this.getPossibleMoves(board);
+    let AImove = possiblemoves[Math.floor(Math.random() * possiblemoves.length)];
+    this.handleClick(AImove[0], AImove[1]);
+  }
+
+  handleClick(row, col) {
+    // exit, if the game has ended
+    if (this.state.gameState !== 'idle') return;
+
+    let {newboard, newscore} = this.makeMove(this.state.board, this.score, this.player, row, col, this.props.color)
+    let result = this.getBoardResult(newboard, newscore);
+
+    this.player = !this.player;
+    this.score = newscore;
+
+    if (result) {
+      this.setState({
+        board: newboard,
+        gameState: result,
+        player1Score: (result.substr(1,2) === 'x') ? this.state.player1Score + 1 : this.state.player1Score,
+        player2Score: (result.substr(1,2) === 'o') ? this.state.player2Score + 1 : this.state.player2Score
+      })
+    } else {
+      this.setState({
+        board: newboard
+      }, () => {
+        if (!this.player) {
+          this.makeAImove(newboard);
+        }
+      });
+    }
   }
 
   render() {
