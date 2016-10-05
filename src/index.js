@@ -90,8 +90,6 @@ class TicTacToeGame extends Component {
       player2Score: 0,
     }
 
-    // Score Array R1-R3, C1-C3, D1, D2
-    this.score = Array(2*3+2).fill(0);
     this.player = true;
 
     this.handleClick = this.handleClick.bind(this);
@@ -109,8 +107,6 @@ class TicTacToeGame extends Component {
   }
 
   handelContinue() {
-    // Score Array R1-R3, C1-C3, D1, D2
-    this.score = Array(2*3+2).fill(0);
     this.setState({
       board: [
         [0, 0, 0],
@@ -143,13 +139,23 @@ class TicTacToeGame extends Component {
     return possiblemoves;
   }
 
-  getBoardResult(board, score) {
+  getBoardResult(board) {
       let result = '';
       let possiblemoves = this.getPossibleMoves(board);
 
       if (possiblemoves.length <= 0) {
         result = '0t'
       }
+
+      let score = Array(2*3+2).fill(0);
+      board.forEach((elem, row) => {
+        elem.forEach((item, col) => {
+          score[row] += item;
+          score[col + 3] += item;
+          if (col === row) score[6] += item;
+          if (2 - col === row) score[7] += item;
+        })
+      });
 
       score.forEach((elem, idx) => {
         if (elem === 3) {
@@ -161,41 +167,74 @@ class TicTacToeGame extends Component {
       return result;
   }
 
-  makeMove(board, score, player, row, col, color) {
+  makeMove(board, player, row, col, color) {
     let point = 0;
-
     if (player) {
       point = 1 * color;
     } else {
       point = -1 * color;
     }
-
     board[row][col] = point;
+    return board
+  }
 
-    // http://stackoverflow.com/a/18668901
-    score[row] += point;
-    score[col + 3] += point;
-    if (col === row) score[6] += point;
-    if (2 - col === row) score[7] += point;
+  /***
+   *  MinMax AI Strongly inspired by
+   *  https://blog.vivekpanyam.com/how-to-build-an-ai-that-wins-the-basics-of-minimax-search/
+   */
 
-    return {newboard: board, newscore: score}
+  MinMax(board, player) {
+    let winner = this.getBoardResult(board).substr(1,2);
+    if (winner !== '') {
+      switch (winner) {
+        case 'x':
+          return [1, board]
+        case 't':
+          return [0, board]
+        case 'o':
+          return [-1, board]
+        default:
+      }
+    } else {
+      let nextVal = null;
+      let nextBoard = null;
+      let pos;
+      board.forEach((elem, row) => {
+        elem.forEach((item, col) => {
+          if (item === 0) {
+            if (player) {
+              board[row][col] = 1
+            } else {
+              board[row][col] = -1
+            }
+            let value = this.MinMax(board, !player);
+            if ((player && (nextVal == null || value > nextVal)) || (!player && (nextVal == null || value < nextVal))) {
+              nextBoard = board.map(function(arr) {
+                return arr.slice();
+              });
+              nextVal = value;
+              pos = [row, col];
+            }
+            board[row][col] = 0;
+          }
+        })
+      })
+      return [nextVal, nextBoard, pos];
+    }
   }
 
   makeAImove(board) {
-    let possiblemoves = this.getPossibleMoves(board);
-    let AImove = possiblemoves[Math.floor(Math.random() * possiblemoves.length)];
-    this.handleClick(AImove[0], AImove[1]);
+    let newboard = this.MinMax(board, this.player);
+    this.handleClick(newboard[2][0], newboard[2][1]);
   }
 
   handleClick(row, col) {
-    // exit, if the game has ended
     if (this.state.gameState !== 'idle') return;
 
-    let {newboard, newscore} = this.makeMove(this.state.board, this.score, this.player, row, col, this.props.color)
-    let result = this.getBoardResult(newboard, newscore);
+    let newboard = this.makeMove(this.state.board, this.player, row, col, this.props.color);
+    let result = this.getBoardResult(newboard);
 
     this.player = !this.player;
-    this.score = newscore;
 
     if (result) {
       this.setState({
