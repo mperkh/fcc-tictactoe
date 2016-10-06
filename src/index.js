@@ -178,14 +178,12 @@ class TicTacToeGame extends Component {
       return result;
   }
 
-  makeMove(board, player, row, col, color) {
-    let point = 0;
-    if (player) {
-      point = 1 * color;
-    } else {
-      point = -1 * color;
-    }
-    board[row][col] = point;
+  makeMove(row, col) {
+    let board = this.state.board.map(function(arr) {
+      return arr.slice();
+    });
+
+    board[row][col] = this.player ? this.props.color : -this.props.color;
     return board
   }
 
@@ -218,7 +216,7 @@ class TicTacToeGame extends Component {
             } else {
               board[row][col] = -1
             }
-            let value = this.MinMax(board, !player);
+            let value = this.MinMax(board, !player)[0];
             if ((player && (nextVal == null || value > nextVal))
               || (!player && (nextVal == null || value < nextVal))) {
               nextBoard = board.map(function(arr) {
@@ -236,14 +234,14 @@ class TicTacToeGame extends Component {
   }
 
   makeAImove(board) {
-    let newboard = this.MinMax(board, this.player);
+    let newboard = this.MinMax(board, this.props.color === 1 ? this.player : !this.palyer);
     this.handleClick(newboard[2][0], newboard[2][1]);
   }
 
   handleClick(row, col) {
     if (this.state.gameState !== 'idle') return;
 
-    let newboard = this.makeMove(this.state.board, this.player, row, col, this.props.color);
+    let newboard = this.makeMove(row, col);
     let result = this.getBoardResult(newboard);
 
     this.player = !this.player;
