@@ -26,7 +26,10 @@ const ModalWinner= (props) => {
         {message}
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="primary" onClick={props.onContinue}>Play another round</Button>
+        <Button
+          bsStyle="primary"
+          onClick={props.onContinue}>Play another round
+        </Button>
       </Modal.Footer>
     </Modal>
   )
@@ -39,11 +42,22 @@ const BaseConfigModal  = (props) => {
         <Modal.Title>Tic Tac Toe</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        Welcome to yet another Tic Tac Toe game. Please choose, if you want to play as 'X' or 'O'.
+        Welcome to yet another Tic Tac Toe game. Please choose,
+        if you want to play as 'X' or 'O'.
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="primary" onClick={props.onChoice.bind(this, -1)}>O</Button>
-        <Button bsStyle="primary" onClick={props.onChoice.bind(this, 1)}>X</Button>
+        <Button
+          bsStyle="primary"
+          onClick={props.onChoice.bind(this, -1)}
+        >
+          O
+        </Button>
+        <Button
+          bsStyle="primary"
+          onClick={props.onChoice.bind(this, 1)}
+        >
+          X
+        </Button>
       </Modal.Footer>
     </Modal>
   )
@@ -52,7 +66,11 @@ const BaseConfigModal  = (props) => {
 const Space = (props) => {
   if (props.item === 0) {
     return (
-      <td className={'col' + props.col + ' space'} key={props.col} onClick={props.onClick.bind(this, props.row, props.col)}>
+      <td
+        className={'col' + props.col + ' space'}
+        key={props.col}
+        onClick={props.onClick.bind(this, props.row, props.col)}
+      >
       </td>
     )
   } else if (props.item === -1) {
@@ -127,24 +145,17 @@ class TicTacToeGame extends Component {
     });
   }
 
-  getPossibleMoves(board) {
-    let possiblemoves = [];
-    board.forEach((item, row) => {
-      item.forEach((elem, col) => {
-        if (elem === 0) {
-          possiblemoves.push([row, col]);
-        }
-      })
-    });
-    return possiblemoves;
-  }
-
   getBoardResult(board) {
       let result = '';
-      let possiblemoves = this.getPossibleMoves(board);
 
-      if (possiblemoves.length <= 0) {
-        result = '0t'
+      if (!
+        board.reduce((prev, curr) => {
+          return prev.concat(
+            curr.some((e) => {return e === 0})
+          )
+        }, []).some((e) => {return e})
+      ) {
+        result ='0t'
       }
 
       let score = Array(2*3+2).fill(0);
@@ -208,7 +219,8 @@ class TicTacToeGame extends Component {
               board[row][col] = -1
             }
             let value = this.MinMax(board, !player);
-            if ((player && (nextVal == null || value > nextVal)) || (!player && (nextVal == null || value < nextVal))) {
+            if ((player && (nextVal == null || value > nextVal))
+              || (!player && (nextVal == null || value < nextVal))) {
               nextBoard = board.map(function(arr) {
                 return arr.slice();
               });
@@ -375,7 +387,15 @@ class App extends Component {
         <Row>
           <Col md={8} mdOffset={2}>
             <PageHeader>freeCodeCamp: Build a Tic Tac Toe Game
-              <br/><small>Project by camper <a href="https://www.freecodecamp.com/mperkh" target="_blank">Michael Perkhofer</a></small>
+              <br/>
+                <small>
+                  Project by camper
+                  <a href="https://www.freecodecamp.com/mperkh"
+                    target="_blank"
+                  >
+                    &nbsp;Michael Perkhofer
+                  </a>
+                </small>
             </PageHeader>
             {mainAction}
           </Col>
