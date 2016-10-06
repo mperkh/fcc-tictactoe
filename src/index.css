@@ -1,6 +1,9 @@
+#root {
+  min-height: 800px;
+}
 table#gamefield {
-    border-collapse: collapse;
-    margin: 0 auto;
+  border-collapse: collapse;
+  margin: 0 auto;
 }
 
 td {
@@ -28,3 +31,4 @@ tr.row0, tr.row1 {
 #resetbtn {
   float: right;
 }
+
